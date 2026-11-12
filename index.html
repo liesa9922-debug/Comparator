@@ -1,0 +1,883 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1-Bit Magnitude Comparator – Virtual IC Lab</title>
+
+<style>
+:root {
+  --blue:#1769aa;
+  --light:#eaf5ff;
+  --ink:#183247;
+  --muted:#5c7182;
+  --line:#d8e7f2;
+  --green:#13845b;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  background:#f5faff;
+  color:var(--ink);
+  font:15px/1.55 Arial,sans-serif;
+}
+
+header {
+  background:linear-gradient(120deg,#e8f5ff,#fff);
+  border-bottom:1px solid var(--line);
+  padding:28px 18px;
+  text-align:center;
+}
+
+.tag {
+  background:#d9edff;
+  color:#145b94;
+  border-radius:30px;
+  padding:5px 12px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+h1 {
+  font-size:clamp(24px,4vw,36px);
+  color:#124d7c;
+  margin:16px 0 8px;
+}
+
+header p { color:var(--muted); }
+
+main {
+  max-width:1100px;
+  margin:24px auto;
+  padding:0 16px 40px;
+}
+
+section {
+  background:white;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  margin:16px 0;
+  box-shadow:0 8px 24px rgba(31,89,130,.08);
+}
+
+h2 {
+  color:#155b91;
+  font-size:20px;
+  margin-top:0;
+}
+
+h3 { font-size:16px; }
+
+.intro-grid,.sim-grid,.ic-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.info,.panel,.ic {
+  background:#f8fbff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:15px;
+}
+
+.components {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.chip {
+  background:var(--light);
+  border:1px solid #cce5fa;
+  color:#175d91;
+  border-radius:8px;
+  padding:6px 10px;
+  font-size:13px;
+}
+
+.inputs {
+  display:flex;
+  gap:12px;
+  margin:14px 0;
+}
+
+.input-card {
+  flex:1;
+  text-align:center;
+  background:white;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+}
+
+.bit {
+  font-size:34px;
+  font-weight:bold;
+  color:var(--blue);
+  margin:5px;
+}
+
+.toggle {
+  border:0;
+  border-radius:30px;
+  padding:10px 20px;
+  min-width:90px;
+  background:#dceaf5;
+  color:#174d75;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.toggle.on {
+  background:var(--blue);
+  color:white;
+}
+
+button:focus-visible {
+  outline:3px solid #8dcaff;
+}
+
+.outputs {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+
+.output {
+  background:white;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px;
+  text-align:center;
+}
+
+.output strong {
+  display:block;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.lamp {
+  display:inline-grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:#e7edf2;
+  color:#607484;
+  font-weight:bold;
+  margin-top:6px;
+}
+
+.output.active .lamp {
+  background:#d7f6e8;
+  color:#08754d;
+}
+
+.actions {
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+button.action {
+  border:0;
+  border-radius:9px;
+  background:var(--blue);
+  color:white;
+  padding:10px 15px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button.secondary {
+  background:#eaf3fa;
+  color:#19557f;
+  border:1px solid #cbddea;
+}
+
+button:disabled {
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.status {
+  color:var(--muted);
+  font-size:13px;
+  min-height:24px;
+}
+
+.circuit-wrap {
+  overflow-x:auto;
+  background:#fbfdff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:8px;
+}
+
+svg {
+  width:100%;
+  min-width:620px;
+  height:auto;
+}
+
+.wire {
+  stroke:#8da6b8;
+  stroke-width:2.5;
+  fill:none;
+}
+
+.wire.active {
+  stroke:#10a36d;
+  stroke-width:4;
+}
+
+.gate {
+  fill:white;
+  stroke:#66879e;
+  stroke-width:2;
+}
+
+.gate.active {
+  stroke:#10a36d;
+  stroke-width:3;
+  fill:#effcf6;
+}
+
+.svg-label {
+  font:bold 13px Arial;
+  fill:#24465e;
+}
+
+.svg-small {
+  font:12px Arial;
+  fill:#587184;
+}
+
+.outbox {
+  fill:#edf6fd;
+  stroke:#9abbd2;
+  stroke-width:1.5;
+}
+
+.outbox.active {
+  fill:#d7f6e8;
+  stroke:#10a36d;
+  stroke-width:2.5;
+}
+
+.truth {
+  width:100%;
+  border-collapse:collapse;
+  text-align:center;
+}
+
+.truth th,.truth td {
+  padding:11px 8px;
+  border-bottom:1px solid var(--line);
+}
+
+.truth th {
+  background:#edf6fd;
+  color:#155b91;
+}
+
+.truth tr.selected {
+  background:#e1f5eb;
+  font-weight:bold;
+  outline:2px solid #62c596;
+}
+
+.truth-wrap {
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:11px;
+}
+
+.ic-grid {
+  grid-template-columns:repeat(3,1fr);
+}
+
+.ic .number {
+  font-size:21px;
+  font-weight:bold;
+  color:var(--blue);
+}
+
+.formula {
+  font-family:monospace;
+  background:#f0f7fc;
+  padding:4px 7px;
+  border-radius:6px;
+}
+
+.result {
+  border-left:4px solid var(--green);
+  background:#f0fbf6;
+  padding:14px;
+  border-radius:8px;
+}
+
+footer {
+  text-align:center;
+  color:#7890a1;
+  padding:20px;
+}
+
+@media(max-width:720px) {
+  .intro-grid,.sim-grid,.ic-grid {
+    grid-template-columns:1fr;
+  }
+
+  section { padding:15px; }
+
+  .outputs { gap:6px; }
+
+  .output { padding:9px 4px; }
+
+  .output strong { font-size:11px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <span class="tag">DIGITAL ELECTRONICS • VIRTUAL PRACTICAL</span>
+  <h1>1-Bit Magnitude Comparator</h1>
+  <p>Virtual IC Lab — Design, simulate and verify the truth table</p>
+</header>
+
+<main>
+
+<section>
+  <h2>Experiment Overview</h2>
+
+  <div class="intro-grid">
+    <div class="info">
+      <h3>Experiment</h3>
+      <p>Design of 1-Bit Magnitude Comparator.</p>
+    </div>
+
+    <div class="info">
+      <h3>Objective</h3>
+      <p>To design and test a 1-bit magnitude comparator using logic gates and verify its truth table.</p>
+    </div>
+  </div>
+
+  <h3>Components Required</h3>
+
+  <div class="components">
+    <span class="chip">IC 7408 — AND Gate</span>
+    <span class="chip">IC 7404 — NOT Gate</span>
+    <span class="chip">IC 7486 — XOR Gate</span>
+    <span class="chip">Connecting wires</span>
+    <span class="chip">Digital trainer kit / power supply</span>
+  </div>
+</section>
+
+
+<section>
+  <h2>Interactive Comparator Simulator</h2>
+
+  <p>Select 0 or 1 for each input. Outputs update automatically.</p>
+
+  <div class="sim-grid">
+
+    <div class="panel">
+
+      <h3>Binary Inputs</h3>
+
+      <div class="inputs">
+
+        <div class="input-card">
+          <strong>Input A</strong>
+          <div class="bit" id="aValue">0</div>
+          <button class="toggle" id="aToggle">OFF · 0</button>
+        </div>
+
+        <div class="input-card">
+          <strong>Input B</strong>
+          <div class="bit" id="bValue">0</div>
+          <button class="toggle" id="bToggle">OFF · 0</button>
+        </div>
+
+      </div>
+
+      <h3>Comparator Outputs</h3>
+
+      <div class="outputs">
+
+        <div class="output" id="gtBox">
+          <strong>A &gt; B</strong>
+          <span class="lamp" id="gtOut">0</span>
+        </div>
+
+        <div class="output" id="eqBox">
+          <strong>A = B</strong>
+          <span class="lamp" id="eqOut">1</span>
+        </div>
+
+        <div class="output" id="ltBox">
+          <strong>A &lt; B</strong>
+          <span class="lamp" id="ltOut">0</span>
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <button class="action" id="testBtn">Test All Combinations</button>
+        <button class="action secondary" id="resetBtn">Reset</button>
+      </div>
+
+      <p class="status" id="status" aria-live="polite">
+        Current state: A = 0, B = 0
+      </p>
+
+    </div>
+
+
+    <div class="panel">
+
+      <h3>Logic Gate Circuit</h3>
+
+      <div class="circuit-wrap">
+
+        <svg viewBox="0 0 720 360">
+
+          <text x="18" y="42" class="svg-label">INPUTS</text>
+          <text x="20" y="91" class="svg-label">A</text>
+          <text x="20" y="151" class="svg-label">B</text>
+
+          <path id="aWire" class="wire" d="M45 86 H105 V112 H155"/>
+          <path id="bWire" class="wire" d="M45 146 H105 V172 H155"/>
+
+          <circle cx="45" cy="86" r="4" fill="#1769aa"/>
+          <circle cx="45" cy="146" r="4" fill="#1769aa"/>
+
+          <text x="110" y="70" class="svg-small">A direct</text>
+          <text x="110" y="190" class="svg-small">B direct</text>
+
+          <path id="notAWire" class="wire" d="M105 86 V245 H155"/>
+          <path id="notBWire" class="wire" d="M105 146 V290 H155"/>
+
+          <path id="notAOut" class="wire" d="M205 245 H270 V210 H320"/>
+          <path id="notBOut" class="wire" d="M205 290 H270 V172 H320"/>
+
+          <path id="aGtWire" class="wire" d="M105 86 H270 V112 H320"/>
+          <path id="bLtWire" class="wire" d="M105 146 H270 V290 H320"/>
+
+          <path id="eqA" class="wire" d="M105 86 V330 H320"/>
+          <path id="eqB" class="wire" d="M105 146 V345 H320"/>
+
+          <path id="notAIn" class="wire" d="M155 245 H205"/>
+          <path id="notBIn" class="wire" d="M155 290 H205"/>
+
+          <path id="gtGateIn1" class="wire" d="M270 112 H320"/>
+          <path id="gtGateIn2" class="wire" d="M270 210 H320"/>
+
+          <path id="ltGateIn1" class="wire" d="M270 290 H320"/>
+          <path id="ltGateIn2" class="wire" d="M270 172 H320"/>
+
+          <rect id="notAGate" class="gate" x="155" y="229" width="50" height="32" rx="5"/>
+          <text x="180" y="250" text-anchor="middle" class="svg-label">NOT</text>
+
+          <rect id="notBGate" class="gate" x="155" y="274" width="50" height="32" rx="5"/>
+          <text x="180" y="295" text-anchor="middle" class="svg-label">NOT</text>
+
+          <rect id="gtGate" class="gate" x="320" y="91" width="82" height="64" rx="8"/>
+          <text x="361" y="128" text-anchor="middle" class="svg-label">AND</text>
+
+          <rect id="ltGate" class="gate" x="320" y="260" width="82" height="64" rx="8"/>
+          <text x="361" y="297" text-anchor="middle" class="svg-label">AND</text>
+
+          <path id="gtOutWire" class="wire" d="M402 123 H540"/>
+          <path id="ltOutWire" class="wire" d="M402 292 H540"/>
+
+          <rect id="gtOutBox" class="outbox" x="540" y="104" width="150" height="38" rx="8"/>
+          <text x="615" y="128" text-anchor="middle" class="svg-label">A &gt; B</text>
+
+          <rect id="ltOutBox" class="outbox" x="540" y="273" width="150" height="38" rx="8"/>
+          <text x="615" y="297" text-anchor="middle" class="svg-label">A &lt; B</text>
+
+          <path id="xorInA" class="wire" d="M105 86 H245 V35 H320"/>
+          <path id="xorInB" class="wire" d="M105 146 H270 V58 H320"/>
+
+          <rect id="xorGate" class="gate" x="320" y="16" width="82" height="58" rx="8"/>
+          <text x="361" y="50" text-anchor="middle" class="svg-label">XOR</text>
+
+          <path id="xorOutWire" class="wire" d="M402 45 H450"/>
+
+          <rect id="eqNotGate" class="gate" x="450" y="29" width="60" height="32" rx="5"/>
+          <text x="480" y="50" text-anchor="middle" class="svg-label">NOT</text>
+
+          <path id="eqOutWire" class="wire" d="M510 45 H540"/>
+
+          <rect id="eqOutBox" class="outbox" x="540" y="26" width="150" height="38" rx="8"/>
+          <text x="615" y="50" text-anchor="middle" class="svg-label">A = B</text>
+
+          <text x="18" y="220" class="svg-small">Complemented inputs</text>
+          <text x="320" y="350" class="svg-small">Conceptual logic diagram</text>
+
+        </svg>
+
+      </div>
+
+      <p class="status">
+        Green paths indicate the logic path producing an output of 1.
+        This is a functional logic diagram, not a physical IC pin layout.
+      </p>
+
+    </div>
+
+  </div>
+</section>
+
+
+<section>
+
+  <h2>Live Truth Table</h2>
+
+  <div class="truth-wrap">
+
+    <table class="truth">
+
+      <thead>
+        <tr>
+          <th>A</th>
+          <th>B</th>
+          <th>A &gt; B</th>
+          <th>A = B</th>
+          <th>A &lt; B</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr data-a="0" data-b="0">
+          <td>0</td><td>0</td><td>0</td><td>1</td><td>0</td>
+        </tr>
+
+        <tr data-a="0" data-b="1">
+          <td>0</td><td>1</td><td>0</td><td>0</td><td>1</td>
+        </tr>
+
+        <tr data-a="1" data-b="0">
+          <td>1</td><td>0</td><td>1</td><td>0</td><td>0</td>
+        </tr>
+
+        <tr data-a="1" data-b="1">
+          <td>1</td><td>1</td><td>0</td><td>1</td><td>0</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <p class="status">
+    The highlighted row matches the currently selected inputs.
+  </p>
+
+</section>
+
+
+<section>
+
+  <h2>Boolean Expressions</h2>
+
+  <p>
+    <strong>Greater than:</strong>
+    <span class="formula">A &gt; B = A · B̅</span>
+  </p>
+
+  <p>
+    <strong>Less than:</strong>
+    <span class="formula">A &lt; B = A̅ · B</span>
+  </p>
+
+  <p>
+    <strong>Equal to:</strong>
+    <span class="formula">A = B = A̅B̅ + AB = (A XOR B)̅</span>
+  </p>
+
+</section>
+
+
+<section>
+
+  <h2>IC Information</h2>
+
+  <div class="ic-grid">
+
+    <div class="ic">
+      <div class="number">IC 7408</div>
+      <h3>Quad 2-input AND Gate</h3>
+      <p>
+        Performs AND operations to generate A greater than B
+        and A less than B outputs.
+      </p>
+    </div>
+
+    <div class="ic">
+      <div class="number">IC 7404</div>
+      <h3>Hex NOT Gate</h3>
+      <p>
+        Inverts A and B to provide complemented inputs A̅ and B̅.
+      </p>
+    </div>
+
+    <div class="ic">
+      <div class="number">IC 7486</div>
+      <h3>Quad 2-input XOR Gate</h3>
+      <p>
+        Produces A XOR B. Its output is inverted to obtain
+        the equality output.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section>
+
+  <h2>Result</h2>
+
+  <div class="result">
+    The 1-bit magnitude comparator was successfully implemented
+    and its outputs were verified using the truth table.
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+  1-Bit Magnitude Comparator • Virtual IC Lab
+</footer>
+
+
+<script>
+
+(() => {
+
+  let A = 0;
+  let B = 0;
+  let timer = null;
+
+  const $ = id => document.getElementById(id);
+
+  const wireIds = [
+    'aWire','bWire','notAWire','notBWire',
+    'notAOut','notBOut','aGtWire','bLtWire',
+    'eqA','eqB','notAIn','notBIn',
+    'gtGateIn1','gtGateIn2',
+    'ltGateIn1','ltGateIn2',
+    'gtOutWire','ltOutWire',
+    'xorInA','xorInB','xorOutWire','eqOutWire'
+  ];
+
+  function setActive(id,on) {
+    const el = $(id);
+    if(el) el.classList.toggle('active',!!on);
+  }
+
+  function render() {
+
+    const gt = (A === 1 && B === 0) ? 1 : 0;
+    const lt = (A === 0 && B === 1) ? 1 : 0;
+    const eq = (A === B) ? 1 : 0;
+
+    $('aValue').textContent = A;
+    $('bValue').textContent = B;
+
+    $('aToggle').textContent = A ? 'ON · 1' : 'OFF · 0';
+    $('bToggle').textContent = B ? 'ON · 1' : 'OFF · 0';
+
+    $('aToggle').classList.toggle('on',!!A);
+    $('bToggle').classList.toggle('on',!!B);
+
+    $('aToggle').setAttribute('aria-pressed',String(!!A));
+    $('bToggle').setAttribute('aria-pressed',String(!!B));
+
+    [['gt',gt],['eq',eq],['lt',lt]].forEach(([key,val]) => {
+
+      $(key+'Out').textContent = val;
+      $(key+'Box').classList.toggle('active',!!val);
+
+      $(key+'OutBox').classList.toggle('active',!!val);
+
+    });
+
+    document.querySelectorAll('tbody tr').forEach(row => {
+
+      row.classList.toggle(
+        'selected',
+        Number(row.dataset.a) === A &&
+        Number(row.dataset.b) === B
+      );
+
+    });
+
+    wireIds.forEach(id => setActive(id,false));
+
+    [
+      'notAGate','notBGate','gtGate',
+      'ltGate','xorGate','eqNotGate'
+    ].forEach(id => $(id).classList.remove('active'));
+
+    // A > B : A AND NOT B
+
+    if(gt) {
+
+      [
+        'aWire','notBWire','notBOut',
+        'gtGateIn1','gtGateIn2','gtOutWire'
+      ].forEach(id => setActive(id,true));
+
+      $('notBGate').classList.add('active');
+      $('gtGate').classList.add('active');
+
+    }
+
+    // A < B : NOT A AND B
+
+    if(lt) {
+
+      [
+        'bWire','notAWire','notAOut',
+        'ltGateIn1','ltGateIn2','ltOutWire'
+      ].forEach(id => setActive(id,true));
+
+      $('notAGate').classList.add('active');
+      $('ltGate').classList.add('active');
+
+    }
+
+    // A = B : NOT (A XOR B)
+
+    if(eq) {
+
+      [
+        'xorInA','xorInB',
+        'xorOutWire','eqOutWire'
+      ].forEach(id => setActive(id,true));
+
+      $('xorGate').classList.add('active');
+      $('eqNotGate').classList.add('active');
+
+    }
+
+    $('status').textContent =
+      `Current state: A = ${A}, B = ${B} | Outputs (>, =, <): ${gt}, ${eq}, ${lt}`;
+
+  }
+
+
+  function stopTest() {
+
+    if(timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+
+    $('testBtn').disabled = false;
+
+  }
+
+
+  $('aToggle').addEventListener('click',() => {
+
+    stopTest();
+    A = 1 - A;
+    render();
+
+  });
+
+
+  $('bToggle').addEventListener('click',() => {
+
+    stopTest();
+    B = 1 - B;
+    render();
+
+  });
+
+
+  $('resetBtn').addEventListener('click',() => {
+
+    stopTest();
+
+    A = 0;
+    B = 0;
+
+    render();
+
+    $('status').textContent =
+      'Reset complete. Current state: A = 0, B = 0';
+
+  });
+
+
+  $('testBtn').addEventListener('click',() => {
+
+    stopTest();
+
+    const combos = [
+      [0,0],
+      [0,1],
+      [1,0],
+      [1,1]
+    ];
+
+    let i = 0;
+
+    $('testBtn').disabled = true;
+
+    const step = () => {
+
+      A = combos[i][0];
+      B = combos[i][1];
+
+      render();
+
+      $('status').textContent =
+        `Automatic test ${i+1}/4: A = ${A}, B = ${B} | Outputs (>, =, <): ${A>B?1:0}, ${A===B?1:0}, ${A<B?1:0}`;
+
+      i++;
+
+      if(i === 4) {
+
+        stopTest();
+
+        $('status').textContent +=
+          ' | All four combinations verified.';
+
+      }
+
+    };
+
+    step();
+
+    timer = setInterval(step,1100);
+
+  });
+
+
+  render();
+
+})();
+
+</script>
+
+</body>
+</html>
